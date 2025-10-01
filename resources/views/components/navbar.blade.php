@@ -9,9 +9,12 @@
           <div class="hidden md:block">
             <div class="ml-10 flex items-baseline space-x-4">
               <!-- Current: "bg-gray-950/50 text-white", Default: "text-gray-300 hover:bg-white/5 hover:text-white" -->
-              <a href="#" aria-current="page" class="rounded-md bg-gray-950/50 px-3 py-2 text-sm font-medium text-white">Home</a>
-              <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Contact</a>
-              <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Profile</a>
+              <x-nav-link href="{{ url('/home') }}" :active="request()->is('home')">Home</x-nav-link>
+              <x-nav-link href="{{ url('/contact') }}" :active="request()->is('contact')">Contact</x-nav-link>
+              <x-nav-link href="{{ url('/profile') }}" :active="request()->is('profile')">Profile</x-nav-link>
+              <x-nav-link href="{{ url('/student') }}" :active="request()->is('student')">Student</x-nav-link>
+              <x-nav-link href="{{ url('/guardians') }}" :active="request()->is('guardians')">Guardian</x-nav-link>
+              <x-nav-link href="{{ url('/classrooms') }}" :active="request()->is('classrooms')">Classroom</x-nav-link>
             </div>
           </div>
         </div>

@@ -17,10 +17,6 @@ class ProfilController extends Controller
             'kelas' => '11 PPLG 1',
             'sekolah' => 'SMK Raden Umar Said'
         ];
-        return view('profil', $data);
-    }
-    public function kontak()
-    {
-   		return view('kontak');
+        return view('profil', $data, ['title' => 'Profile']);
     }
 }
