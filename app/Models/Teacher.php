@@ -8,8 +8,15 @@ use App\Models\Subject;
 
 class Teacher extends Model
 {
-    /** @use HasFactory<\Database\Factories\TeacherFactory> */
     use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'email',
+        'phone',
+        'address',
+        'subject_id',
+    ];
 
     public function subject()
     {
