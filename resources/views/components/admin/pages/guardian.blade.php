@@ -2,12 +2,30 @@
 
     <div class="flex justify-between items-center mt-10 mb-6">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Guardian List</h1>
+    </div>
+
+    {{-- Search --}}
+    <form method="GET" class="mb-4 flex gap-2">
+        <input type="text"
+               name="search"
+               value="{{ request('search') }}"
+               placeholder="Search name, email, class..."
+               class="w-full md:w-1/3 p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-white">
+
+        <button class="px-4 py-2 bg-gray-800 text-white rounded-lg">Search</button>
+
+        @if(request('search'))
+            <a href="{{ url()->current() }}"
+               class="px-4 py-3 bg-gray-800 text-white rounded-lg">
+                ❌
+            </a>
+        @endif
 
         <button data-modal-target="addGuardianModal" data-modal-toggle="addGuardianModal"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            class="absolute right-25 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             + Add Guardian
         </button>
-    </div>
+    </form>
 
     {{-- Table --}}
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -24,7 +42,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($guardian as $item)
+                @foreach ($guardians as $item)
                     <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                         <td class="px-6 py-4">{{ $loop->iteration }}</td>
                         <td class="px-6 py-4">{{ $item->name }}</td>
@@ -112,6 +130,10 @@
         </table>
     </div>
 
+    {{-- Pagination --}}
+    <div class="mt-4">
+        {{ $guardians->links() }}
+    </div>
 
     {{-- ADD MODAL --}}
     <div id="addGuardianModal" tabindex="-1" aria-hidden="true"

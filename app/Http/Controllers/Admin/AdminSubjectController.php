@@ -8,37 +8,41 @@ use Illuminate\Http\Request;
 
 class AdminSubjectController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $subject = Subject::all();
+        $search = $request->query('search');
+
+        $subjects = Subject::when($search, function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%");
+            })
+            ->latest()
+            ->paginate(5)
+            ->withQueryString();
 
         return view('components.admin.pages.subject', [
             'title' => 'Subject List',
-            'subject' => $subject
+            'subjects' => $subjects
         ]);
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        Subject::create($request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-        ]);
+        ]));
 
-        Subject::create($validated);
-
-        return redirect()->back()->with('success', 'Subject berhasil ditambahkan!');
+        return back()->with('success', 'Subject ditambahkan');
     }
 
     public function update(Request $request, Subject $subject)
     {
-        $validated = $request->validate([
+        $subject->update($request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-        ]);
+        ]));
 
-        $subject->update($validated);
-
-        return redirect()->back()->with('success', 'Subject berhasil diupdate!');
+        return back()->with('success', 'Subject diupdate');
     }
 }

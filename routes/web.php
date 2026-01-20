@@ -68,3 +68,7 @@ Route::put('/admin/subjects/{subject}', [App\Http\Controllers\Admin\AdminSubject
 //     Route::get('/profil', [AdminProfilController::class, 'index'])->name('profil');
 //     Route::get('/kontak', [AdminKontakController::class, 'index'])->name('kontak');
 // });
+
+Route::get('/login', [App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [App\Http\Controllers\Auth\LoginController::class, 'login'])->name('login.submit');
+Route::post('/logout', [App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');

@@ -2,18 +2,35 @@
 
     <div class="flex justify-between items-center mt-10 mb-6"> 
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Student List</h1>
-
-        {{-- Tombol tambah student --}}
-        <button data-modal-target="addStudentModal" data-modal-toggle="addStudentModal"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition">
-            + Add Student
-        </button>
     </div>
 
-    {{-- Tabel data student --}}
+    {{-- Search --}}
+    <form method="GET" class="mb-4 flex gap-2">
+        <input type="text"
+               name="search"
+               value="{{ request('search') }}"
+               placeholder="Search name, email, class..."
+               class="w-full md:w-1/3 p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-white">
+
+        <button class="px-4 py-2 bg-gray-800 text-white rounded-lg">Search</button>
+
+        @if(request('search'))
+            <a href="{{ url()->current() }}"
+               class="px-4 py-3 bg-gray-800 text-white rounded-lg">
+                ❌
+            </a>
+        @endif
+
+        <button data-modal-target="addStudentModal" data-modal-toggle="addStudentModal"
+            class="absolute right-25 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            + Add Student
+        </button>
+    </form>
+
+    {{-- Table --}}
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-            <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">
                 <tr>
                     <th class="px-6 py-3">No</th>
                     <th class="px-6 py-3">Name</th>
@@ -24,165 +41,102 @@
                     <th class="px-6 py-3">Actions</th>
                 </tr>
             </thead>
-            
             <tbody>
-                @forelse ($students as $i => $student)
-                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                        <td class="px-6 py-4">{{ $loop->iteration }}</td>
-                        <td class="px-6 py-4">{{ $student->name }}</td>
-                        <td class="px-6 py-4">{{ $student->brithday ? $student->brithday->format('d-m-Y') : '-' }}</td>
-                        <td class="px-6 py-4">{{ $student->classroom->name ?? '-' }}</td>
-                        <td class="px-6 py-4">{{ $student->email }}</td>
-                        <td class="px-6 py-4">{{ $student->address }}</td>
+                @forelse ($students as $student)
+                <tr class="bg-white border-b dark:bg-gray-800">
+                    <td class="px-6 py-4">
+                        {{ $students->firstItem() + $loop->index }}
+                    </td>
+                    <td class="px-6 py-4">{{ $student->name }}</td>
+                    <td class="px-6 py-4">
+                        {{ $student->brithday ? $student->brithday->format('d-m-Y') : '-' }}
+                    </td>
+                    <td class="px-6 py-4">{{ $student->classroom->name ?? '-' }}</td>
+                    <td class="px-6 py-4">{{ $student->email }}</td>
+                    <td class="px-6 py-4">{{ $student->address }}</td>
+                    <td class="px-6 py-4 flex gap-2">
 
-                        <td class="px-6 py-4">
-                            {{-- Tombol Edit --}}
-                            <button data-modal-target="editStudentModal-{{ $student->id }}"
-                                    data-modal-toggle="editStudentModal-{{ $student->id }}"
-                                    class="px-3 py-1.5 text-xs font-medium text-white bg-yellow-500 hover:bg-yellow-600 rounded-lg">
-                                ✏️
+                        <button data-modal-target="editStudentModal-{{ $student->id }}"
+                                data-modal-toggle="editStudentModal-{{ $student->id }}"
+                                class="px-3 py-1.5 bg-yellow-500 text-white rounded">
+                            ✏️
+                        </button>
+
+                        <form action="{{ route('admin.student.destroy', $student->id) }}"
+                              method="POST"
+                              onsubmit="return confirm('Yakin hapus data?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="px-3 py-1.5 bg-red-600 text-white rounded">
+                                🗑️
                             </button>
+                        </form>
+                    </td>
+                </tr>
 
-                            {{-- Tombol Delete --}}
-                            <form action="{{ route('admin.student.destroy', $student->id) }}"
-                                  method="POST" class="inline-block"
-                                  onsubmit="return confirm('Yakin ingin menghapus student ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button class="px-3 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg">
-                                    🗑️
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
+                {{-- Modal Edit --}}
+                <div id="editStudentModal-{{ $student->id }}"
+                     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                    <div class="bg-white dark:bg-gray-700 w-full max-w-md rounded-lg p-4">
+                        <form action="{{ route('admin.student.update', $student->id) }}" method="POST">
+                            @csrf
+                            @method('PUT')
 
-                    {{-- Modal Edit Student --}}
-                    <div id="editStudentModal-{{ $student->id }}" tabindex="-1"
-                        class="hidden fixed inset-0 z-50 flex items-center justify-center w-full p-4 bg-black/50">
+                            <input name="name" value="{{ $student->name }}" class="w-full mb-2 p-2 rounded">
+                            <input type="date" name="brithday"
+                                   value="{{ $student->brithday?->format('Y-m-d') }}"
+                                   class="w-full mb-2 p-2 rounded">
+                            <input name="email" value="{{ $student->email }}" class="w-full mb-2 p-2 rounded">
+                            <input name="address" value="{{ $student->address }}" class="w-full mb-2 p-2 rounded">
 
-                        <div class="relative w-full max-w-md bg-white rounded-lg shadow dark:bg-gray-700">
-                            <div class="flex items-center justify-between p-4 border-b dark:border-gray-600">
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                                    Edit Student
-                                </h3>
-                                <button type="button"
-                                        data-modal-toggle="editStudentModal-{{ $student->id }}"
-                                        class="text-gray-400 hover:text-gray-900 dark:hover:text-white">✕</button>
-                            </div>
+                            <select name="classroom_id" class="w-full mb-3 p-2 rounded">
+                                @foreach ($classrooms as $classroom)
+                                    <option value="{{ $classroom->id }}"
+                                        {{ $classroom->id == $student->classroom_id ? 'selected' : '' }}>
+                                        {{ $classroom->name }}
+                                    </option>
+                                @endforeach
+                            </select>
 
-                            <form action="{{ route('admin.student.update', $student->id) }}"
-                                  method="POST" class="p-1 space-y-4">
-                                @csrf
-                                @method('PUT')
-
-                                <div class="px-2">
-                                    <label class="block text-sm font-medium">Name</label>
-                                    <input type="text" name="name" value="{{ $student->name }}" required
-                                           class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-600">
-                                </div>
-
-                                <div class="px-2 pt-1">
-                                    <label class="block text-sm font-medium">Birthday</label>
-                                    <input type="date" name="brithday"
-                                           value="{{ $student->brithday?->format('Y-m-d') }}"
-                                           class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-600">
-                                </div>
-
-                                <div class="px-2 pt-1">
-                                    <label class="block text-sm font-medium">Email</label>
-                                    <input type="email" name="email" value="{{ $student->email }}" required
-                                           class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-600">
-                                </div>
-
-                                <div class="px-2 pt-1">
-                                    <label class="block text-sm font-medium">Address</label>
-                                    <input type="text" name="address" value="{{ $student->address }}" required
-                                           class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-600">
-                                </div>
-
-                                <div class="px-2 pt-1">
-                                    <label class="block text-sm font-medium">Class</label>
-                                    <select name="classroom_id"
-                                            class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-600">
-                                        @foreach ($classrooms as $classroom)
-                                            <option value="{{ $classroom->id }}"
-                                                {{ $classroom->id == $student->classroom_id ? 'selected' : '' }}>
-                                                {{ $classroom->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="pt-6">
-                                <button type="submit"
-                                        class="w-full py-2.5 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">
-                                    Update
-                                </button>
-                                </div>
-                            </form>
-                        </div>
+                            <button class="w-full bg-yellow-600 text-white py-2 rounded">
+                                Update
+                            </button>
+                        </form>
                     </div>
-
+                </div>
                 @empty
-                    <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">Belum ada data siswa.</td>
-                    </tr>
+                <tr>
+                    <td colspan="7" class="text-center py-4">Tidak ada data</td>
+                </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 
-    {{-- Modal Tambah Student --}}
-    <div id="addStudentModal" tabindex="-1"
-         class="hidden fixed inset-0 z-50 flex items-center justify-center w-full p-4 bg-black/50">
+    {{-- Pagination --}}
+    <div class="mt-4">
+        {{ $students->links() }}
+    </div>
 
-        <div class="relative w-full max-w-md bg-white rounded-lg shadow dark:bg-gray-700">
-            <div class="flex items-center justify-between p-4 border-b dark:border-gray-600">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Add New Student</h3>
-                <button type="button" data-modal-toggle="addStudentModal"
-                        class="text-gray-400 hover:text-gray-900 dark:hover:text-white">✕</button>
-            </div>
-
-            <form action="{{ route('admin.student.store') }}" method="POST" class="p-6 space-y-4">
+    {{-- Modal Add Student --}}
+    <div id="addStudentModal"
+         class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div class="bg-white dark:bg-gray-700 w-full max-w-md rounded-lg p-4">
+            <form action="{{ route('admin.student.store') }}" method="POST">
                 @csrf
+                <input name="name" placeholder="Name" class="w-full mb-2 p-2 rounded">
+                <input type="date" name="brithday" class="w-full mb-2 p-2 rounded">
+                <input name="email" placeholder="Email" class="w-full mb-2 p-2 rounded">
+                <input name="address" placeholder="Address" class="w-full mb-2 p-2 rounded">
 
-                <div>
-                    <label class="block text-sm font-medium">Name</label>
-                    <input type="text" name="name" required
-                           class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-600">
-                </div>
+                <select name="classroom_id" class="w-full mb-3 p-2 rounded">
+                    <option value="">-- Pilih Kelas --</option>
+                    @foreach ($classrooms as $classroom)
+                        <option value="{{ $classroom->id }}">{{ $classroom->name }}</option>
+                    @endforeach
+                </select>
 
-                <div>
-                    <label class="block text-sm font-medium">Birthday</label>
-                    <input type="date" name="brithday"
-                           class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-600">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium">Email</label>
-                    <input type="email" name="email" required
-                           class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-600">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium">Address</label>
-                    <input type="text" name="address" required
-                           class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-600">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium">Class</label>
-                    <select name="classroom_id" required
-                            class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-600">
-                        <option value="">-- Pilih Kelas --</option>
-                        @foreach ($classrooms as $classroom)
-                            <option value="{{ $classroom->id }}">{{ $classroom->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <button type="submit"
-                        class="w-full py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <button class="w-full bg-blue-600 text-white py-2 rounded">
                     Save
                 </button>
             </form>

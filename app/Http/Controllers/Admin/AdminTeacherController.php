@@ -9,9 +9,24 @@ use Illuminate\Http\Request;
 
 class AdminTeacherController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $teachers = Teacher::with('subject')->get();
+        $search = $request->query('search');
+
+        $teachers = Teacher::with('subject')
+            ->when($search, function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%")
+                      ->orWhere('phone', 'like', "%{$search}%")
+                      ->orWhere('address', 'like', "%{$search}%")
+                      ->orWhereHas('subject', function ($q) use ($search) {
+                          $q->where('name', 'like', "%{$search}%");
+                      });
+            })
+            ->latest()
+            ->paginate(5)
+            ->withQueryString();
+
         $subjects = Subject::all();
 
         return view('components.admin.pages.teacher', [
@@ -33,7 +48,7 @@ class AdminTeacherController extends Controller
 
         Teacher::create($validated);
 
-        return redirect()->back()->with('success', 'Teacher berhasil ditambahkan!');
+        return back()->with('success', 'Teacher berhasil ditambahkan');
     }
 
     public function update(Request $request, Teacher $teacher)
@@ -48,13 +63,13 @@ class AdminTeacherController extends Controller
 
         $teacher->update($validated);
 
-        return redirect()->back()->with('success', 'Teacher berhasil diupdate!');
+        return back()->with('success', 'Teacher berhasil diupdate');
     }
 
     public function destroy(Teacher $teacher)
     {
         $teacher->delete();
 
-        return redirect()->back()->with('success', 'Teacher berhasil dihapus!');
+        return back()->with('success', 'Teacher berhasil dihapus');
     }
 }
