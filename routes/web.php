@@ -32,7 +32,7 @@ Route::get('/classrooms', [App\Http\Controllers\ClassroomController::class, 'ind
 Route::get('/teachers', [App\Http\Controllers\TeacherController::class, 'index']);
 Route::get('/subjects', [App\Http\Controllers\SubjectController::class, 'index']);
 
-Route::get('/admin/dashboard', [App\Http\Controllers\Admin\AdminDashboardController::class, 'index']);
+// Route::get('/admin/dashboard', [App\Http\Controllers\Admin\AdminDashboardController::class, 'index']);
 Route::get('/admin/profil', [App\Http\Controllers\Admin\AdminProfilController::class, 'index']);
 Route::get('/admin/kontak', [App\Http\Controllers\Admin\AdminKontakController::class, 'index']);
 
@@ -72,3 +72,13 @@ Route::put('/admin/subjects/{subject}', [App\Http\Controllers\Admin\AdminSubject
 Route::get('/login', [App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [App\Http\Controllers\Auth\LoginController::class, 'login'])->name('login.submit');
 Route::post('/logout', [App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/dashboard', [App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('admin.dashboard');
+});
+
+Route::get('/home', function () {
+    return view('home', [
+        'title' => 'Home'
+    ]);
+})->name('home');

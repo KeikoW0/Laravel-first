@@ -1,9 +1,15 @@
 <nav class="bg-gray-800/50">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="flex h-16 items-center justify-between">
+
+      {{-- LEFT --}}
       <div class="flex items-center">
         <div class="shrink-0">
-          <img src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company" class="size-8" />
+          <img
+            src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
+            alt="Logo"
+            class="size-8"
+          />
         </div>
 
         <div class="hidden md:block">
@@ -20,34 +26,46 @@
         </div>
       </div>
 
+      {{-- RIGHT --}}
       <div class="flex items-center gap-4">
         @auth
-          <form action="{{ route('logout') }}" method="POST">
-            @csrf
-            <button class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded hover:bg-red-700">
-              Logout
+          <div class="relative group">
+            <button
+              class="flex items-center gap-2 rounded-md bg-gray-700 px-4 py-2 text-sm text-white hover:bg-gray-600">
+              {{ Auth::user()->name }}
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                   viewBox="0 0 24 24">
+                <path d="M19 9l-7 7-7-7" />
+              </svg>
             </button>
-          </form>
+
+            {{-- DROPDOWN --}}
+            <div
+              class="absolute right-0 z-50 mt-2 w-44 rounded-md bg-white shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition">
+
+              <a href="{{ route('admin.dashboard') }}"
+                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                Dashboard
+              </a>
+
+              <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button
+                  type="submit"
+                  class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                  Logout
+                </button>
+              </form>
+            </div>
+          </div>
         @else
           <a href="{{ route('login') }}"
-             class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded hover:bg-indigo-700">
+             class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
             Login
           </a>
         @endauth
       </div>
 
-      <div class="-mr-2 flex md:hidden">
-        <button type="button" command="--toggle" commandfor="mobile-menu"
-          class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-white/5 hover:text-white focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500">
-          <span class="sr-only">Open main menu</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="size-6 in-aria-expanded:hidden">
-            <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-          </svg>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="size-6 not-in-aria-expanded:hidden">
-            <path d="M6 18 18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
     </div>
   </div>
 </nav>
